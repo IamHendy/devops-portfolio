@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.app.name }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.app.name }}
+    managed-by: helm
+data:
+  NODE_ENV: "production"
+  PORT: "{{ .Values.app.port }}"
+  HOST: "0.0.0.0"
+  APP_NAME: {{ .Values.app.name }}
+  APP_VERSION: {{ .Chart.AppVersion }}
+  CORS_ORIGIN: "http://{{ .Values.ingress.host }}"
