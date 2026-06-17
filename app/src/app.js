@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const path    = require('path');
 const config  = require('../config/env');
 const { requestLogger } = require('./middleware/requestLogger');
 const { errorHandler }  = require('./middleware/errorHandler');
@@ -8,16 +9,11 @@ const userRoutes        = require('./routes/users');
 
 const app = express();
 
-// Security: don't tell clients what framework we're using
 app.disable('x-powered-by');
-
-// Trust the Nginx proxy's headers
 app.set('trust proxy', 1);
-
-// Parse incoming JSON request bodies
 app.use(express.json());
 
-// CORS headers — who is allowed to call this API
+// CORS
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin',  config.cors.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
@@ -26,10 +22,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Log every request
 app.use(requestLogger);
 
-// Health endpoint — Docker and load balancers check this to know the app is alive
+// Serve static frontend files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Health endpoint
 app.get('/health', (req, res) => {
   res.json({
     status:    'ok',
@@ -39,15 +37,14 @@ app.get('/health', (req, res) => {
   });
 });
 
-// All user routes live under /api/v1/users
+// API routes
 app.use('/api/v1/users', userRoutes);
 
-// 404 — catches any request that didn't match a route above
+// 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found', path: req.path });
 });
 
-// Global error handler — must be last
 app.use(errorHandler);
 
 module.exports = app;
