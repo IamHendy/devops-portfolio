@@ -1,0 +1,32 @@
+replicaCount: 1
+
+image:
+  repository: devops-portfolio-app
+  tag: latest
+  pullPolicy: Never
+
+app:
+  name: users-api
+  port: 3000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  host: devopsportfolio.strangled.net
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+healthcheck:
+  path: /health
+  initialDelaySeconds: 15
+  periodSeconds: 10
