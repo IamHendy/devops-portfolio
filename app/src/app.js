@@ -3,9 +3,10 @@
 const express = require('express');
 const path    = require('path');
 const config  = require('../config/env');
-const { requestLogger } = require('./middleware/requestLogger');
-const { errorHandler }  = require('./middleware/errorHandler');
-const userRoutes        = require('./routes/users');
+const { requestLogger }          = require('./middleware/requestLogger');
+const { errorHandler }           = require('./middleware/errorHandler');
+const { register, metricsMiddleware } = require('./metrics');
+const userRoutes                 = require('./routes/users');
 
 const app = express();
 
@@ -24,6 +25,9 @@ app.use((req, res, next) => {
 
 app.use(requestLogger);
 
+// Metrics middleware — tracks every request
+app.use(metricsMiddleware);
+
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -35,6 +39,12 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     version:   config.app.version,
   });
+});
+
+// Metrics endpoint — Prometheus scrapes this every 15s
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
 });
 
 // API routes

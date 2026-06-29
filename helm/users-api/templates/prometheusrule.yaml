@@ -1,0 +1,46 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Values.app.name }}-alerts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: users-api.rules
+      interval: 30s
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            rate(http_requests_total{status_code=~"5.."}[5m])
+            /
+            rate(http_requests_total[5m]) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High error rate on users-api"
+            description: "Error rate is above 5%"
+
+        - alert: HighLatency
+          expr: |
+            histogram_quantile(0.95,
+              rate(http_request_duration_seconds_bucket[5m])
+            ) > 0.5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High p95 latency on users-api"
+            description: "p95 latency above 500ms"
+
+        - alert: PodNotRunning
+          expr: |
+            kube_deployment_status_replicas_available{
+              deployment="users-api"
+            } < 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "users-api has no available replicas"

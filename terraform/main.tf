@@ -33,7 +33,7 @@ resource "kubernetes_namespace" "production" {
 
 resource "helm_release" "users_api" {
   name      = var.app_name
-  chart     = "${path.module}/helm/users-api"
+  chart     = "${path.module}/../helm/users-api"
   namespace = kubernetes_namespace.production.metadata[0].name
 
   set {
