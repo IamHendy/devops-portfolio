@@ -1,0 +1,52 @@
+# ArgoCD Application manifest
+# Defines GitOps-based continuous deployment for users-api
+# 
+# NOTE: Not deployed on this single-node learning cluster due to memory
+# constraints. ArgoCD requires ~300MB RAM minimum. Would be deployed
+# on a production multi-node cluster.
+#
+# How to deploy:
+#   kubectl create namespace argocd
+#   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+#   kubectl apply -f argocd/application.yaml
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: users-api
+  namespace: argocd
+  labels:
+    project: devops-portfolio
+    environment: production
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/IamHendy/devops-portfolio.git
+    targetRevision: main
+    path: helm/users-api
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: image.tag
+          value: latest
+        - name: domain
+          value: devopsportfolio.strangled.net
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

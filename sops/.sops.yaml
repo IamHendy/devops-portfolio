@@ -1,0 +1,18 @@
+# SOPS configuration for secrets encryption
+# Encrypts .env files before committing to Git
+# 
+# Usage:
+#   sops --encrypt .env > .env.encrypted
+#   sops --decrypt .env.encrypted > .env
+#
+# In GitHub Actions, set SOPS_AGE_KEY as a secret
+# then decrypt in the workflow:
+#   sops --decrypt .env.encrypted > .env
+
+creation_rules:
+  - path_regex: \.env.*
+    age: >-
+      age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+  - path_regex: secrets/.*\.yaml
+    age: >-
+      age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p

@@ -1,0 +1,59 @@
+# Minimal ArgoCD Helm values for single-node cluster
+# Memory-optimized for learning environments
+
+global:
+  logging:
+    level: warn
+
+server:
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 128Mi
+      cpu: 100m
+  extraArgs:
+    - --insecure
+
+repoServer:
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 128Mi
+      cpu: 100m
+
+applicationSet:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 10m
+    limits:
+      memory: 64Mi
+      cpu: 50m
+
+notifications:
+  enabled: false
+
+dex:
+  enabled: false
+
+redis:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 10m
+    limits:
+      memory: 64Mi
+      cpu: 50m
+
+controller:
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 300m
